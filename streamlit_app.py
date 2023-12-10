@@ -1,29 +1,38 @@
 import streamlit as st
 import requests
 
-# Configurar la URL de la API
-API_URL = "https://api.afforai.com/api/api_completion"
-
-# Función para llamar a la API y obtener la respuesta
 def obtener_respuesta_pregunta(pregunta):
+    url = "https://api.afforai.com/api/api_completion"
+    api_key = "fcbfdfe8-e9ed-41f3-a7d8-b6587538e84e"
+    session_id = "65489d7c9ad727940f2ab26f"
+
     payload = {
-        "apiKey": "fcbfdfe8-e9ed-41f3-a7d8-b6587538e84e",
-        "sessionID": "65489d7c9ad727940f2ab26f",
+        "apiKey": api_key,
+        "sessionID": session_id,
         "history": [{"role": "user", "content": pregunta}],
         "powerful": True,
         "google": True
     }
-    response = requests.post(API_URL, json=payload)
-    respuesta = response.json()
-    return respuesta["completions"][0]["choices"][0]["text"]
 
-# Configurar la interfaz de la aplicación con Streamlit
+    response = requests.post(url, json=payload)
+
+    if response.status_code == 200:
+        data = response.json()
+        return data.get("content", "No se pudo obtener respuesta.")
+    else:
+        return "Error al hacer la solicitud a la API."
+
 def main():
     st.title("Preguntas sobre las leyes de Guatemala")
-    pregunta = st.text_input("Haz tu pregunta aquí")
-    if pregunta:
-        respuesta = obtener_respuesta_pregunta(pregunta)
-        st.markdown(f"**Respuesta:** {respuesta}")
+
+    pregunta_usuario = st.text_input("Haz tu pregunta:")
+
+    if st.button("Obtener Respuesta"):
+        if pregunta_usuario:
+            respuesta = obtener_respuesta_pregunta(pregunta_usuario)
+            st.markdown(f"**Respuesta:** {respuesta}")
+        else:
+            st.warning("Por favor, ingresa una pregunta.")
 
 if __name__ == "__main__":
     main()
